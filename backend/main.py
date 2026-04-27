@@ -451,8 +451,9 @@ class ConnectionManager:
 manager = ConnectionManager()
 
 # ── REST Endpoints ────────────────────────────────────────────
-@app.get("/")
-def root():
+@app.get("/api/info")
+def api_info():
+    """Platform status — moved from `/` so the SPA can be served at root."""
     return {
         "status": "StockPulse API v3.1 running",
         "docs": "/docs",
