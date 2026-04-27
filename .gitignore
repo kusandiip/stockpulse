@@ -1,0 +1,44 @@
+# ── Secrets ──
+.env
+.env.local
+*.pem
+*.key
+
+# ── Python ──
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# ── Virtual environments ──
+venv/
+env/
+.venv/
+backend/venv/
+
+# ── Node ──
+node_modules/
+.parcel-cache/
+.next/
+out/
+
+# ── Build outputs ──
+frontend/dist/
+frontend/build/
+
+# ── Database / runtime ──
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.log
+*.pid
+
+# ── IDE / OS ──
+.vscode/
+.idea/
+.claude/
+.DS_Store
+Thumbs.db
+*.swp

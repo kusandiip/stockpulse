@@ -1,0 +1,25 @@
+services:
+  backend:
+    build: ./backend
+    container_name: stockpulse-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - DATABASE_URL=${DATABASE_URL:-sqlite+aiosqlite:///./stockpulse.db}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+    volumes:
+      - stockpulse-data:/app/data
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: stockpulse-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  stockpulse-data:
