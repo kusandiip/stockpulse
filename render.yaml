@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: stockpulse
+    runtime: python
+    plan: free
+    region: singapore
+    rootDir: .
+    buildCommand: |
+      cd frontend && npm ci && npm run build && cd .. && \
+      cd backend && pip install -r requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.4
+      - key: NODE_VERSION
+        value: "20"
+      - key: GROQ_API_KEY
+        sync: false      # set manually in Render dashboard (do not commit)
+      - key: ENVIRONMENT
+        value: production

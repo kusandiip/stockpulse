@@ -1079,6 +1079,40 @@ async def chat(req: ChatRequest):
 
     return StreamingResponse(stream(), media_type="text/event-stream", headers={"Cache-Control":"no-cache","X-Accel-Buffering":"no"})
 
+# ── Serve built frontend in production (single-service deploy) ────────
+# When frontend has been built (dist/ exists), serve it from this same app.
+# This means one Render service can host both API and SPA at one URL.
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+_FRONTEND_DIST = os.path.join(os.path.dirname(__file__), "..", "frontend", "dist")
+_FRONTEND_DIST = os.path.abspath(_FRONTEND_DIST)
+
+if os.path.isdir(_FRONTEND_DIST):
+    logger.info(f"Serving SPA from {_FRONTEND_DIST}")
+
+    # Mount /assets (vite-bundled JS/CSS/images)
+    _assets_dir = os.path.join(_FRONTEND_DIST, "assets")
+    if os.path.isdir(_assets_dir):
+        app.mount("/assets", StaticFiles(directory=_assets_dir), name="assets")
+
+    # SPA fallback — any GET that wasn't matched above returns index.html.
+    # Browser router then handles client-side routing.
+    @app.get("/{full_path:path}")
+    def spa_fallback(full_path: str):
+        # If a real file exists in dist, serve it directly (favicon, robots.txt, etc.)
+        candidate = os.path.join(_FRONTEND_DIST, full_path)
+        if full_path and os.path.isfile(candidate):
+            return FileResponse(candidate)
+        # Otherwise return index.html — React handles the route
+        index = os.path.join(_FRONTEND_DIST, "index.html")
+        if os.path.isfile(index):
+            return FileResponse(index)
+        raise HTTPException(404, "Frontend not built. Run `npm run build` in frontend/.")
+else:
+    logger.info("Frontend dist not found — running in API-only mode (use vite dev for UI)")
+
+
 if __name__=="__main__":
     import uvicorn
     uvicorn.run("main:app",host="0.0.0.0",port=8000,reload=True)
